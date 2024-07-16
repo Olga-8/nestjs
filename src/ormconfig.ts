@@ -7,8 +7,9 @@ const ormconfig = new DataSource({
     username: "admin",
     password: "1234",
     database: "np",
-    synchronize: true,
+    synchronize: false,
     entities: [__dirname + "/**/*.entity{.ts,.js}"],
+    migrations: [__dirname + "/migrations/*{.ts,.js}"],
 })
 
 export default ormconfig
