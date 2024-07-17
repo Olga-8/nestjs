@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';   
 import { JwtSekretKey } from '@app/config';
 import { UserResponseInterface } from './types/userResponse.interface';
+import { UserLoginDto } from './dto/loginUser.dto';
+import { compare } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -29,17 +31,17 @@ export class UserService {
 
         const newUser = new UserEntity();
         Object.assign(newUser, createUserDto);
-        
+
         return await this.userRepository.save(newUser);
     }
 
     userResponse(user: UserEntity): UserResponseInterface{
         const token =  this.generateJWT(user);
-        const { password, ...result } = user;
+     
         return { 
             user:
                 {
-                    token, ...result
+                    token, ...user
                 } 
         };
     }
@@ -51,4 +53,29 @@ export class UserService {
             name: user.name
         }, JwtSekretKey, { expiresIn: '1d'});
     }
+
+    async userLogin(userLoginDto: UserLoginDto): Promise<UserEntity> {
+
+        const user = await this.userRepository.findOne({
+            where: {
+                email: userLoginDto.email
+            },
+            select: ['id', 'email', 'name', 'password', 'role']
+        });
+        
+        if (!user) {
+            throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+        }
+
+        const isPasswordCorrect = await compare(userLoginDto.password, user.password);
+
+        if (!isPasswordCorrect) {
+            throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+        }
+        
+        delete user.password;
+        
+        return user;
+    }
+
 }
