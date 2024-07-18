@@ -8,6 +8,7 @@ import { JwtSekretKey } from '@app/config';
 import { UserResponseInterface } from './types/userResponse.interface';
 import { UserLoginDto } from './dto/loginUser.dto';
 import { compare } from 'bcrypt';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 @Injectable()
 export class UserService {
@@ -82,4 +83,9 @@ export class UserService {
         return this.userRepository.findOne({ where: { id } });
     }
 
+    async updateUser(id: number, updateUserDto: UpdateUserDto): Promise<UserEntity> {
+        const user = await this.findCurrentUserById(id);
+        Object.assign(user, updateUserDto);
+        return await this.userRepository.save(user);
+    }
 }
