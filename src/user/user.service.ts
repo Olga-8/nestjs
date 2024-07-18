@@ -74,8 +74,12 @@ export class UserService {
         }
         
         delete user.password;
-        
+
         return user;
+    }
+
+    findCurrentUserById(id: number): Promise<UserEntity> {
+        return this.userRepository.findOne({ where: { id } });
     }
 
 }
