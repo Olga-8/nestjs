@@ -13,6 +13,5 @@ export class CreateArticleDto {
     @IsNotEmpty()
     readonly body: string;
 
-    @IsArray()
     readonly tagList?: string[];
 }
